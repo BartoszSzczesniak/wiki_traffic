@@ -1,0 +1,7 @@
+__pycache__
+data/*
+input/*
+models/*
+tuning/*
+notes.*
+*_tmp.*
