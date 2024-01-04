@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 
 class SampleFeed():
     
-    def __init__(self, training_window_size: int, predicted_window_size: int, samples_per_epoch: int, n_features: int) -> None:
+    def __init__(self, training_window_size: int, predicted_window_size: int, samples_per_epoch: int) -> None:
         """
         Tool generating inputs and outputs for the single-input version of the wiki traffic model.
 
@@ -17,14 +17,11 @@ class SampleFeed():
             eg. predicted_window_size=7 means that the model predicts values for following 7-day
         samples_per_epoch: int
             number of random samples generated per sequence
-        n_features: int
-            number of features used in the model (sequence of numbers of visits is counted as one feature).
         """
 
         self.training_window_size = training_window_size
         self.predicted_window_size = predicted_window_size
         self.samples_per_epoch = samples_per_epoch
-        self.n_features = n_features
 
     def random_sample_generator(self, features: Dict[str, np.ndarray], samples_per_page: int = 1, shuffle: bool = False, seed: float | None = None) -> Tuple[np.ndarray, np.ndarray]:
         """
@@ -94,7 +91,7 @@ class SampleFeed():
                     sample_page_features
                     ], axis=1)
 
-                X = sample_features_all.reshape(1, self.training_window_size, self.n_features)
+                X = sample_features_all.reshape(1, self.training_window_size, -1)
                 y = page_visits[window_end: window_end + self.predicted_window_size].reshape(1, self.predicted_window_size)
 
                 yield X, y
