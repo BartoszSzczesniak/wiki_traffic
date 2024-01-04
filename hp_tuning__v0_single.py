@@ -49,7 +49,7 @@ class LSTMHypermodel(keras_tuner.HyperModel):
         hp.Float(name='lstm_l2_recurrent', min_value=0.0, max_value=0.01, step=0.01, default=0.0)
 
         # hp.Float(name='lstm_l2_kernel', min_value=0.0, max_value=0.01, step=0.01, default=0.0)
-        hp.Fixed(name='lstm_l2_kernel', value=None)
+        hp.Fixed(name='lstm_l2_kernel', value=0.0)
 
         hp.Float(name='lstm_l2_bias', min_value=0.0, max_value=0.01, step=0.01, default=0.0)
 
@@ -67,7 +67,7 @@ class LSTMHypermodel(keras_tuner.HyperModel):
             hp.Float(name='lstm2_l2_recurrent', min_value=0.0, max_value=0.01, step=0.01, default=0.0)
 
             # hp.Float(name='lstm2_l2_kernel', min_value=0.0, max_value=0.01, step=0.01, default=0.0)
-            hp.Fixed(name='lstm2_l2_kernel', value=None)
+            hp.Fixed(name='lstm2_l2_kernel', value=0.0)
             
             hp.Float(name='lstm2_l2_bias', min_value=0.0, max_value=0.01, step=0.01, default=0.0)
 
@@ -85,7 +85,7 @@ class LSTMHypermodel(keras_tuner.HyperModel):
             hp.Float(name='dense1_dropout_rate', min_value=0.0, max_value=0.3, step=0.1, default=0.1, parent_name='dense1_dropout', parent_values=[True,])
 
             # hp.Float(name='dense1_l2_kernel', min_value=0.0, max_value=0.01, step=0.01, default=0.0)
-            hp.Fixed(name='dense1_l2_kernel', value=None)
+            hp.Fixed(name='dense1_l2_kernel', value=0.0)
 
             hp.Float(name='dense1_l2_bias', min_value=0.0, max_value=0.01, step=0.01, default=0.0)
 
@@ -259,10 +259,18 @@ class LSTMHypermodel(keras_tuner.HyperModel):
             for X, y in self.random_sample_generator(hp, features, samples_per_iter, True):
                 yield X, y
 
+TRAINING_WINDOW_SIZE = 90
+PREDICTED_WINDOW_SIZE = 7
+
+N_FEATURES = 21
+N_EPOCHS = 6
+
+MAX_TRIALS = 10
+REDUCE_PAGES = 10
+PROJECT_NAME = "try1220"
+
 def run():
     """Run hyperparameter tuning"""
-
-    REDUCE_PAGES = 10
 
     features_train = dict(np.load("data/features_train.npz", allow_pickle=True))
     features_valid = dict(np.load("data/features_valid.npz", allow_pickle=True))
@@ -273,20 +281,18 @@ def run():
     features_valid['visits'] = features_valid['visits'][::REDUCE_PAGES, :]
     features_valid['page'] = features_valid['page'][::REDUCE_PAGES, :]
 
-    n_features = features_train['time'].shape[1] + features_train['page'].shape[1] + 1
-
     lstm_hypermodel = LSTMHypermodel(
-        training_window_size = 90,
-        predicted_window_size = 7,
-        n_features = n_features
+        training_window_size = TRAINING_WINDOW_SIZE,
+        predicted_window_size = PREDICTED_WINDOW_SIZE,
+        n_features = N_FEATURES
     )
 
     tuner = keras_tuner.BayesianOptimization(
         hypermodel=lstm_hypermodel,
         objective=keras_tuner.Objective(name='val_root_mean_squared_error', direction='min'),
-        max_trials=10,
+        max_trials=MAX_TRIALS,
         directory='tuning',
-        project_name='try1220'
+        project_name=PROJECT_NAME
     )
 
     model_callbacks = [
@@ -298,7 +304,7 @@ def run():
     tuner.search(
         features_train = features_train, 
         features_test = features_valid,
-        epochs = 6,
+        epochs = N_EPOCHS,
         callbacks = model_callbacks
         )
     
