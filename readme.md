@@ -12,10 +12,11 @@ https://www.kaggle.com/competitions/web-traffic-time-series-forecasting/data
 
 ### Results:
 
-To address the problem I developed several LSTM-based models. The best-performing model achieved RMSE of 0.0809 on the test dataset (not used for validation).  
+To address the problem I developed several LSTM-based models.  
+The best-performing model achieved **RMSE of 0.0809** on the test dataset (not used for validation).  
 Comparatively, the baseline models achieved the following scores:
-- Naive model (returns the last seen value): 0.1071
-- Random model (random within the expected range): 0.3946
+- Naive model (returns the last seen value): **0.1071**
+- Random model (random within the expected range): **0.3946**
 
 Key observations regarding the model's performance:
 - The developed model outperformed both the naive and random models. 
